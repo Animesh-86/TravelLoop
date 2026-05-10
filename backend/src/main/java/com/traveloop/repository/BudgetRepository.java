@@ -26,4 +26,6 @@ public interface BudgetRepository extends JpaRepository<Budget, UUID> {
     List<Object[]> getCategoryBreakdown(@Param("tripId") UUID tripId);
 
     void deleteByTripTripIdAndBudgetId(UUID tripId, UUID budgetId);
+
+    void deleteByTripTripId(UUID tripId);
 }

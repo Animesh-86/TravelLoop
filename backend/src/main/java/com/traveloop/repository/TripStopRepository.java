@@ -13,4 +13,6 @@ public interface TripStopRepository extends JpaRepository<TripStop, UUID> {
     List<TripStop> findByTripTripIdOrderByStopOrderAsc(UUID tripId);
 
     void deleteByTripTripIdAndStopId(UUID tripId, UUID stopId);
+
+    void deleteByTripTripId(UUID tripId);
 }
