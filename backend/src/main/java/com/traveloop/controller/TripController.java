@@ -35,15 +35,6 @@ public class TripController {
         return ResponseEntity.status(HttpStatus.CREATED).body(tripService.createTrip(userId, request));
     }
 
-    @GetMapping("/{tripId}")
-    @Operation(summary = "Get trip by ID")
-    public ResponseEntity<TripResponse> getTrip(
-            Authentication auth,
-            @PathVariable UUID tripId) {
-        UUID userId = (UUID) auth.getPrincipal();
-        return ResponseEntity.ok(tripService.getTripById(tripId, userId));
-    }
-
     @GetMapping("/my")
     @Operation(summary = "Get current user's trips")
     public ResponseEntity<List<TripResponse>> getMyTrips(Authentication auth) {
@@ -68,6 +59,15 @@ public class TripController {
     @Operation(summary = "Get trip by share token (public link)")
     public ResponseEntity<TripResponse> getTripByShareToken(@PathVariable String shareToken) {
         return ResponseEntity.ok(tripService.getTripByShareToken(shareToken));
+    }
+
+    @GetMapping("/{tripId}")
+    @Operation(summary = "Get trip by ID")
+    public ResponseEntity<TripResponse> getTrip(
+            Authentication auth,
+            @PathVariable UUID tripId) {
+        UUID userId = (UUID) auth.getPrincipal();
+        return ResponseEntity.ok(tripService.getTripById(tripId, userId));
     }
 
     @PutMapping("/{tripId}")
