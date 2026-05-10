@@ -3,6 +3,7 @@
    ──────────────────────────────────────────── */
 
 import { Routes, Route, Navigate } from 'react-router-dom';
+import { Toaster } from 'react-hot-toast';
 import Navbar from './components/layout/Navbar';
 import Sidebar from './components/layout/Sidebar';
 import Footer from './components/layout/Footer';
@@ -12,6 +13,10 @@ import ProtectedRoute from './components/layout/ProtectedRoute';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
 import Dashboard from './pages/Dashboard';
+import CreateTrip from './pages/CreateTrip';
+import ItineraryBuilder from './pages/ItineraryBuilder';
+import MyTrips from './pages/MyTrips';
+import Search from './pages/Search';
 
 export default function App() {
   return (
@@ -27,7 +32,7 @@ export default function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
 
-            {/* ── Protected Routes ── */}
+            {/* ── Phase 2 Routes (Active) ── */}
             <Route
               path="/dashboard"
               element={
@@ -36,21 +41,27 @@ export default function App() {
                 </ProtectedRoute>
               }
             />
-
-            {/* ── Phase 2 placeholders ── */}
-            <Route
-              path="/trips"
-              element={
-                <ProtectedRoute>
-                  <PlaceholderPage title="My Trips" description="Coming in Phase 2" />
-                </ProtectedRoute>
-              }
-            />
             <Route
               path="/create-trip"
               element={
                 <ProtectedRoute>
-                  <PlaceholderPage title="Create Trip" description="Coming in Phase 2" />
+                  <CreateTrip />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/trips/:tripId"
+              element={
+                <ProtectedRoute>
+                  <ItineraryBuilder />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/trips"
+              element={
+                <ProtectedRoute>
+                  <MyTrips />
                 </ProtectedRoute>
               }
             />
@@ -58,10 +69,12 @@ export default function App() {
               path="/search"
               element={
                 <ProtectedRoute>
-                  <PlaceholderPage title="Explore" description="Coming in Phase 2" />
+                  <Search />
                 </ProtectedRoute>
               }
             />
+
+            {/* ── Phase 3 Placeholders ── */}
             <Route
               path="/profile"
               element={
@@ -111,6 +124,26 @@ export default function App() {
       </div>
 
       <Footer />
+
+      {/* Global toast notifications */}
+      <Toaster
+        position="top-right"
+        toastOptions={{
+          duration: 3000,
+          style: {
+            borderRadius: '12px',
+            background: '#1a1a1a',
+            color: '#fff',
+            fontSize: '14px',
+          },
+          success: {
+            iconTheme: { primary: '#2D5F5D', secondary: '#fff' },
+          },
+          error: {
+            iconTheme: { primary: '#ef4444', secondary: '#fff' },
+          },
+        }}
+      />
     </div>
   );
 }
