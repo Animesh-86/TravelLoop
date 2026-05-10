@@ -7,6 +7,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Repository
@@ -24,4 +25,6 @@ public interface CityRepository extends JpaRepository<City, UUID> {
 
     @Query("SELECT DISTINCT c.country FROM City c ORDER BY c.country")
     List<String> findAllCountries();
+
+    Optional<City> findFirstByCityNameContainingIgnoreCase(String cityName);
 }
