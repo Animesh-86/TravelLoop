@@ -69,6 +69,7 @@ public class AuthServiceImpl implements AuthService {
 
             GoogleIdToken idTokenObj = verifier.verify(idToken);
             if (idTokenObj == null) {
+                log.warn("Invalid Google ID Token provided: {}", idToken.substring(0, Math.min(idToken.length(), 10)) + "...");
                 throw new InvalidCredentialsException("Invalid Google ID Token");
             }
 
@@ -96,8 +97,8 @@ public class AuthServiceImpl implements AuthService {
 
             return buildAuthResponse(user);
 
-        } catch (GeneralSecurityException | IOException e) {
-            log.error("Google authentication failed", e);
+        } catch (Exception e) {
+            log.error("Google authentication failed: {}", e.getMessage(), e);
             throw new InvalidCredentialsException("Google authentication failed");
         }
     }

@@ -53,6 +53,9 @@ public class AuthController {
     @Operation(summary = "Authenticate with Google ID Token")
     public ResponseEntity<AuthResponse> googleLogin(@RequestBody Map<String, String> body) {
         String idToken = body.get("idToken");
+        if (idToken == null || idToken.isBlank()) {
+            return ResponseEntity.badRequest().build();
+        }
         AuthResponse response = authService.googleLogin(idToken);
         return ResponseEntity.ok(response);
     }

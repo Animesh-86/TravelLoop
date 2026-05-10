@@ -53,7 +53,19 @@ The system uses PostgreSQL with the following core entities:
 
 ---
 
-## 🚀 Getting Started (Docker)
+## � Authentication
+
+TravelLoop supports two authentication methods:
+- **Email/Password**: Traditional email-based registration and login
+- **Google OAuth 2.0**: One-click sign-in with Google account
+
+Both methods are configured with sensible defaults. For local development setup and troubleshooting, see [AUTH_SETUP.md](AUTH_SETUP.md).
+
+For testing authentication locally, refer to [TESTING_AUTH.md](TESTING_AUTH.md).
+
+---
+
+## �🚀 Getting Started (Docker)
 
 ### 1. Prerequisites
 - Docker & Docker Compose installed.
