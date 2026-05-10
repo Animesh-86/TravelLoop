@@ -7,7 +7,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   ArrowLeft, Calendar, MapPin, DollarSign,
-  Share2, Edit3, Globe, Lock, MousePointer2, Luggage
+  Share2, Edit3, Globe, Lock, MousePointer2, Luggage, Plus
 } from 'lucide-react';
 import { useTrip } from '../hooks/useTrips';
 import { useBudgetSummary } from '../hooks/useBudget';
