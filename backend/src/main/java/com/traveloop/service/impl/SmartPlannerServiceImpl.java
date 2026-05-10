@@ -327,71 +327,107 @@ public class SmartPlannerServiceImpl implements SmartPlannerService {
     @Override
     @Transactional
     public String chatWithGenie(UUID tripId, UUID userId, String message) {
-        Trip trip = tripRepository.findById(tripId)
-                .orElseThrow(() -> new ResourceNotFoundException("Trip not found"));
+        try {
+            Trip trip = tripRepository.findById(tripId)
+                    .orElseThrow(() -> new ResourceNotFoundException("Trip not found"));
 
-        if (!trip.getUser().getUserId().equals(userId)) {
-            throw new RuntimeException("Only owner can chat about trip details");
+            if (!trip.getUser().getUserId().equals(userId)) {
+                throw new RuntimeException("Only owner can chat about trip details");
+            }
+
+            String destination = trip.getStops().isEmpty() || trip.getStops().get(0).getCity() == null 
+                    ? trip.getTripName() 
+                    : trip.getStops().get(0).getCity().getCityName();
+
+            // ── Enhanced Context: Itinerary ──
+            StringBuilder itineraryContext = new StringBuilder("\nItinerary Stops:\n");
+            trip.getStops().forEach(stop -> {
+                itineraryContext.append(String.format("- %s (%s to %s): %s\n", 
+                    stop.getCity() != null ? stop.getCity().getCityName() : "Unknown",
+                    stop.getArrivalDate(), stop.getDepartureDate(),
+                    stop.getNotes() != null ? stop.getNotes() : "No notes"));
+            });
+
+            // ── Enhanced Context: Packing List ──
+            List<com.traveloop.model.entity.PackingItem> packingItems = packingItemRepository.findByTripTripIdOrderByCategoryAscItemNameAsc(tripId);
+            StringBuilder packingContext = new StringBuilder("\nPacking List:\n");
+            packingItems.forEach(item -> {
+                packingContext.append(String.format("- [%s] %s (%s)\n", 
+                    item.getIsPacked() ? "x" : " ", item.getItemName(), item.getCategory()));
+            });
+
+            String context = String.format("Current Trip: %s\nDestination: %s\nDates: %s to %s\nTotal Budget: %s\n" +
+                            "Description: %s\n%s%s",
+                    trip.getTripName(), destination, trip.getStartDate(), trip.getEndDate(),
+                    trip.getTotalBudget(), trip.getDescription(), 
+                    itineraryContext.toString(), packingContext.toString());
+
+            String fullPrompt = "You are TravelLoop Genie, an AI travel assistant. " +
+                    "The user is planning the following trip:\n" + context + "\n\n" +
+                    "Instructions:\n" +
+                    "1. If the user asks for a summary, provide a concise, high-level overview of their itinerary and readiness (packing progress).\n" +
+                    "2. If the user asks about a city, provide interesting facts, weather insights, or travel tips for that location.\n" +
+                    "3. Be helpful, friendly, and concise. Provide actionable advice.\n\n" +
+                    "The user says: " + message;
+
+            return chatClient.prompt().user(fullPrompt).call().content();
+        } catch (Exception e) {
+            log.warn("Genie trip chat unavailable, using fallback response: {}", e.getMessage());
+            return buildGenieFallbackResponse(message, true);
         }
-
-        String destination = trip.getStops().isEmpty() || trip.getStops().get(0).getCity() == null 
-                ? trip.getTripName() 
-                : trip.getStops().get(0).getCity().getCityName();
-
-        // ── Enhanced Context: Itinerary ──
-        StringBuilder itineraryContext = new StringBuilder("\nItinerary Stops:\n");
-        trip.getStops().forEach(stop -> {
-            itineraryContext.append(String.format("- %s (%s to %s): %s\n", 
-                stop.getCity() != null ? stop.getCity().getCityName() : "Unknown",
-                stop.getArrivalDate(), stop.getDepartureDate(),
-                stop.getNotes() != null ? stop.getNotes() : "No notes"));
-        });
-
-        // ── Enhanced Context: Packing List ──
-        List<com.traveloop.model.entity.PackingItem> packingItems = packingItemRepository.findByTripTripIdOrderByCategoryAscItemNameAsc(tripId);
-        StringBuilder packingContext = new StringBuilder("\nPacking List:\n");
-        packingItems.forEach(item -> {
-            packingContext.append(String.format("- [%s] %s (%s)\n", 
-                item.getIsPacked() ? "x" : " ", item.getItemName(), item.getCategory()));
-        });
-
-        String context = String.format("Current Trip: %s\nDestination: %s\nDates: %s to %s\nTotal Budget: %s\n" +
-                        "Description: %s\n%s%s",
-                trip.getTripName(), destination, trip.getStartDate(), trip.getEndDate(),
-                trip.getTotalBudget(), trip.getDescription(), 
-                itineraryContext.toString(), packingContext.toString());
-
-        String fullPrompt = "You are TravelLoop Genie, an AI travel assistant. " +
-                "The user is planning the following trip:\n" + context + "\n\n" +
-                "Instructions:\n" +
-                "1. If the user asks for a summary, provide a concise, high-level overview of their itinerary and readiness (packing progress).\n" +
-                "2. If the user asks about a city, provide interesting facts, weather insights, or travel tips for that location.\n" +
-                "3. Be helpful, friendly, and concise. Provide actionable advice.\n\n" +
-                "The user says: " + message;
-
-        return chatClient.prompt().user(fullPrompt).call().content();
     }
 
     @Override
     public String generalChat(String message) {
-        String faqContext = "Platform: TravelLoop (Smart Travel Planning)\n" +
-                "Features: AI Itinerary Generation, Budget Tracking, Collaborative Planning, Packing Lists, Community Sharing.\n" +
-                "FAQs:\n" +
-                "- How to create a trip? Go to Dashboard and click 'Create Trip'.\n" +
-                "- Is it free? Yes, the basic version is free for all travelers.\n" +
-                "- How does AI planning work? We use Gemini AI to analyze your preferences and generate a structured plan.\n" +
-                "- Can I invite friends? Yes, use the 'Collaborators' section in the trip builder.\n" +
-                "- How to track expenses? Use the '+' button in the Budget section of your trip.\n" +
-                "- How to see Indian cities? We prioritize them on the dashboard automatically!\n";
+        try {
+            String faqContext = "Platform: TravelLoop (Smart Travel Planning)\n" +
+                    "Features: AI Itinerary Generation, Budget Tracking, Collaborative Planning, Packing Lists, Community Sharing.\n" +
+                    "FAQs:\n" +
+                    "- How to create a trip? Go to Dashboard and click 'Create Trip'.\n" +
+                    "- Is it free? Yes, the basic version is free for all travelers.\n" +
+                    "- How does AI planning work? We use Gemini AI to analyze your preferences and generate a structured plan.\n" +
+                    "- Can I invite friends? Yes, use the 'Collaborators' section in the trip builder.\n" +
+                    "- How to track expenses? Use the '+' button in the Budget section of your trip.\n" +
+                    "- How to see Indian cities? We prioritize them on the dashboard automatically!\n";
 
-        String fullPrompt = "You are TravelLoop Genie, the helpful AI assistant for the TravelLoop platform. " +
-                "Context about the website:\n" + faqContext + "\n\n" +
-                "Instructions:\n" +
-                "1. Answer user questions about the website, features, and general travel advice.\n" +
-                "2. Be friendly, concise, and helpful.\n" +
-                "3. If they ask about a specific trip, guide them to open that trip first.\n\n" +
-                "User says: " + message;
+            String fullPrompt = "You are TravelLoop Genie, the helpful AI assistant for the TravelLoop platform. " +
+                    "Context about the website:\n" + faqContext + "\n\n" +
+                    "Instructions:\n" +
+                    "1. Answer user questions about the website, features, and general travel advice.\n" +
+                    "2. Be friendly, concise, and helpful.\n" +
+                    "3. If they ask about a specific trip, guide them to open that trip first.\n\n" +
+                    "User says: " + message;
 
-        return chatClient.prompt().user(fullPrompt).call().content();
+            return chatClient.prompt().user(fullPrompt).call().content();
+        } catch (Exception e) {
+            log.warn("Genie general chat unavailable, using fallback response: {}", e.getMessage());
+            return buildGenieFallbackResponse(message, false);
+        }
+    }
+
+    private String buildGenieFallbackResponse(String message, boolean tripContext) {
+        String lowered = message == null ? "" : message.toLowerCase();
+
+        if (tripContext) {
+            if (lowered.contains("summary") || lowered.contains("summarize")) {
+                return "Here’s a quick trip summary: your itinerary is saved, and you can review your stops, budget, and packing progress from this trip page. Gemini is temporarily unavailable, but your trip data is still accessible.";
+            }
+            if (lowered.contains("city") || lowered.contains("destination")) {
+                return "Your trip destination is available on the itinerary page. Gemini is temporarily unavailable, but I can still help you review the trip details, budget, and packing list.";
+            }
+            return "TravelLoop Genie is temporarily unavailable right now, but I can still help you review this trip’s itinerary, budget, and packing list from the page.";
+        }
+
+        if (lowered.contains("create") || lowered.contains("trip")) {
+            return "To create a trip, go to the dashboard and click Create Trip. You can then add your destination, dates, budget, and travelers.";
+        }
+        if (lowered.contains("budget") || lowered.contains("expense")) {
+            return "You can track expenses inside the Budget section of your trip. Add costs there to see your spending breakdown.";
+        }
+        if (lowered.contains("friend") || lowered.contains("collaborator")) {
+            return "Yes, TravelLoop supports collaboration. Use the collaborators section inside a trip to invite friends and plan together.";
+        }
+
+        return "TravelLoop Genie is temporarily unavailable right now, but the platform still supports trip creation, budget tracking, collaboration, and AI itinerary planning once the AI service is available again.";
     }
 }
