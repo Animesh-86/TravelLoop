@@ -29,4 +29,15 @@ public interface TripRepository extends JpaRepository<Trip, UUID> {
 
     @Query("SELECT t.status, COUNT(t) FROM Trip t WHERE t.user.userId = :userId GROUP BY t.status")
     List<Object[]> countByStatusForUser(@Param("userId") UUID userId);
+
+    /* ── Admin analytics ── */
+
+    long countByStatus(String status);
+
+    long countByIsPublicTrue();
+
+    @Query("SELECT c.cityName, c.country, COUNT(s) as tripCount " +
+           "FROM TripStop s JOIN s.city c " +
+           "GROUP BY c.cityName, c.country ORDER BY tripCount DESC")
+    List<Object[]> findTopDestinations();
 }
