@@ -17,8 +17,18 @@ export default function useWebSocket(tripId) {
   useEffect(() => {
     if (!tripId || !user) return;
 
+    const token = useAuthStore.getState().accessToken;
+    
+    // In dev, API runs on 8080. In prod, it might be relative or full URL.
+    // For now, construct the full URL.
+    const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:8080';
+    const wsUrl = `${baseUrl.replace('/api', '')}/ws`;
+
     const client = new Client({
-      webSocketFactory: () => new SockJS('/ws'),
+      webSocketFactory: () => new SockJS(wsUrl),
+      connectHeaders: {
+        Authorization: `Bearer ${token}`
+      },
       reconnectDelay: 5000,
       debug: () => {},
     });

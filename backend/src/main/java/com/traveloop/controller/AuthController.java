@@ -49,6 +49,14 @@ public class AuthController {
         return ResponseEntity.ok(response);
     }
 
+    @PostMapping("/google-login")
+    @Operation(summary = "Authenticate with Google ID Token")
+    public ResponseEntity<AuthResponse> googleLogin(@RequestBody Map<String, String> body) {
+        String idToken = body.get("idToken");
+        AuthResponse response = authService.googleLogin(idToken);
+        return ResponseEntity.ok(response);
+    }
+
     @GetMapping("/me")
     @Operation(summary = "Get current authenticated user details")
     public ResponseEntity<UserResponse> getCurrentUser(Authentication authentication) {

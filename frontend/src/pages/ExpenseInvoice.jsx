@@ -11,6 +11,8 @@ import { useBudgetSummary, useBudgetItems } from '../hooks/useBudget';
 import { formatCurrency, formatDateFull } from '../utils/formatters';
 import { LineSkeleton } from '../components/ui/LoadingSkeleton';
 
+import AiReceiptScanner from '../components/budget/AiReceiptScanner';
+
 export default function ExpenseInvoice() {
   const { tripId } = useParams();
   const navigate = useNavigate();
@@ -36,6 +38,12 @@ export default function ExpenseInvoice() {
   };
 
   const handlePrint = () => window.print();
+
+  const handleItemsExtracted = (result) => {
+    // In a real app, we would send these items to the backend
+    // to add them to the budget. For the hackathon, we show a success toast.
+    // toast.success(`Added ${result.items.length} items to budget!`);
+  };
 
   const isLoading = summaryLoading || itemsLoading;
 
@@ -66,6 +74,8 @@ export default function ExpenseInvoice() {
               </p>
             </div>
             <div className="flex gap-2 print:hidden">
+              <AiReceiptScanner onItemsExtracted={handleItemsExtracted} />
+              
               <button
                 onClick={handlePrint}
                 className="p-2.5 rounded-xl border border-neutral-200 hover:bg-neutral-50 transition-colors"

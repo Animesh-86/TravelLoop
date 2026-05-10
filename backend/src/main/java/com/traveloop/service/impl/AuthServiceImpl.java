@@ -11,6 +11,10 @@ import com.traveloop.model.entity.User;
 import com.traveloop.repository.UserRepository;
 import com.traveloop.security.JwtUtil;
 import com.traveloop.service.interfaces.AuthService;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
+import com.google.api.client.http.javanet.NetHttpTransport;
+import com.google.api.client.json.gson.GsonFactory;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,6 +23,10 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.IOException;
+import java.security.GeneralSecurityException;
+import java.util.Collections;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -35,6 +43,9 @@ public class AuthServiceImpl implements AuthService {
     @Value("${app.jwt.access-token-expiration-ms}")
     private long accessTokenExpirationMs;
 
+    @Value("${app.google.client-id}")
+    private String googleClientId;
+
     public AuthServiceImpl(UserRepository userRepository,
                            PasswordEncoder passwordEncoder,
                            JwtUtil jwtUtil,
@@ -43,6 +54,52 @@ public class AuthServiceImpl implements AuthService {
         this.passwordEncoder = passwordEncoder;
         this.jwtUtil = jwtUtil;
         this.modelMapper = modelMapper;
+    }
+
+    @Override
+    public AuthResponse googleLogin(String idToken) {
+        if (googleClientId == null || googleClientId.isEmpty()) {
+            log.error("Google Client ID is not configured");
+            throw new InvalidCredentialsException("Google Sign-In is not configured on the server");
+        }
+        try {
+            GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(new NetHttpTransport(), new GsonFactory())
+                    .setAudience(Collections.singletonList(googleClientId))
+                    .build();
+
+            GoogleIdToken idTokenObj = verifier.verify(idToken);
+            if (idTokenObj == null) {
+                throw new InvalidCredentialsException("Invalid Google ID Token");
+            }
+
+            GoogleIdToken.Payload payload = idTokenObj.getPayload();
+            String email = payload.getEmail();
+            String name = (String) payload.get("name");
+            String pictureUrl = (String) payload.get("picture");
+
+            Optional<User> userOpt = userRepository.findByEmail(email.toLowerCase().trim());
+            User user;
+            if (userOpt.isPresent()) {
+                user = userOpt.get();
+            } else {
+                // Register new user
+                user = User.builder()
+                        .fullName(name)
+                        .email(email.toLowerCase().trim())
+                        .passwordHash(passwordEncoder.encode(UUID.randomUUID().toString())) // Random password
+                        .profilePhotoUrl(pictureUrl)
+                        .role("USER")
+                        .build();
+                user = userRepository.save(user);
+                log.info("New user registered via Google: {}", user.getEmail());
+            }
+
+            return buildAuthResponse(user);
+
+        } catch (GeneralSecurityException | IOException e) {
+            log.error("Google authentication failed", e);
+            throw new InvalidCredentialsException("Google authentication failed");
+        }
     }
 
     @Override
@@ -110,6 +167,11 @@ public class AuthServiceImpl implements AuthService {
                 .userId(user.getUserId())
                 .email(user.getEmail())
                 .fullName(user.getFullName())
+                .phoneNumber(user.getPhoneNumber())
+                .city(user.getCity())
+                .country(user.getCountry())
+                .profilePhotoUrl(user.getProfilePhotoUrl())
+                .createdAt(user.getCreatedAt())
                 .role(user.getRole())
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)

@@ -21,6 +21,8 @@ CREATE TABLE IF NOT EXISTS trips (
     description      TEXT,
     start_date       DATE NOT NULL,
     end_date         DATE NOT NULL,
+    country          VARCHAR(100),
+    city             VARCHAR(100),
     cover_photo_url  VARCHAR(500),
     status           VARCHAR(20) DEFAULT 'upcoming',
     is_public        BOOLEAN DEFAULT FALSE,
@@ -133,3 +135,10 @@ CREATE INDEX IF NOT EXISTS idx_notes_trip         ON trip_notes(trip_id);
 CREATE INDEX IF NOT EXISTS idx_collab_trip        ON trip_collaborators(trip_id);
 CREATE INDEX IF NOT EXISTS idx_cities_country     ON cities(country);
 CREATE INDEX IF NOT EXISTS idx_cities_popularity  ON cities(popularity_score DESC);
+
+CREATE TABLE IF NOT EXISTS community_messages (
+    message_id       UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id          UUID NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
+    content          TEXT NOT NULL,
+    created_at       TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);

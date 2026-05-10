@@ -35,6 +35,9 @@ const sidebarLinks = [
   { section: 'Social', items: [
     { path: '/community', label: 'Community', icon: Users },
   ]},
+  { section: 'System', items: [
+    { path: '/', label: 'Landing Page', icon: BookOpen },
+  ]},
 ];
 
 export default function Sidebar() {

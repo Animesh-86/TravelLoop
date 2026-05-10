@@ -245,6 +245,9 @@ export default function Signup() {
           </div>
 
           <div className="mb-6">
+            <Link to="/" className="inline-flex items-center gap-2 text-primary text-sm font-bold mb-6 hover:gap-3 transition-all">
+                <ArrowRight className="w-4 h-4 rotate-180" /> Back to Home
+            </Link>
             <h1 className="font-display text-2xl font-bold text-neutral-dark mb-2">
               Create your account
             </h1>

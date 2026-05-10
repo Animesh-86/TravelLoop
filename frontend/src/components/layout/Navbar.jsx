@@ -144,6 +144,16 @@ export default function Navbar() {
                             My Profile
                           </Link>
 
+                          <Link
+                            to="/"
+                            onClick={() => setProfileOpen(false)}
+                            className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-neutral-600
+                                       hover:bg-neutral-50 transition-colors"
+                          >
+                            <LayoutDashboard className="w-4 h-4" />
+                            Visit Home
+                          </Link>
+
                           <button
                             onClick={handleLogout}
                             id="nav-logout-btn"

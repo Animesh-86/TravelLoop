@@ -2,12 +2,14 @@ package com.traveloop.controller;
 
 import com.traveloop.model.dto.response.CityResponse;
 import com.traveloop.service.interfaces.CityService;
+import com.traveloop.service.interfaces.WebScraperService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @RestController
@@ -16,9 +18,11 @@ import java.util.UUID;
 public class CityController {
 
     private final CityService cityService;
+    private final WebScraperService scraperService;
 
-    public CityController(CityService cityService) {
+    public CityController(CityService cityService, WebScraperService scraperService) {
         this.cityService = cityService;
+        this.scraperService = scraperService;
     }
 
     @GetMapping
@@ -61,5 +65,11 @@ public class CityController {
     @Operation(summary = "Get list of all available countries")
     public ResponseEntity<List<String>> getAllCountries() {
         return ResponseEntity.ok(cityService.getAllCountries());
+    }
+
+    @GetMapping("/guide")
+    @Operation(summary = "Get scraped travel guide from Wikivoyage for a destination")
+    public ResponseEntity<Map<String, String>> getCityGuide(@RequestParam String city) {
+        return ResponseEntity.ok(scraperService.scrapeDestinationGuide(city));
     }
 }

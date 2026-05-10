@@ -9,6 +9,8 @@ import { motion } from 'framer-motion';
 const INITIAL = {
   tripName: '',
   description: '',
+  country: '',
+  city: '',
   startDate: '',
   endDate: '',
   coverPhotoUrl: '',
@@ -25,6 +27,8 @@ export default function TripForm({ initialData, onSubmit, isLoading, submitLabel
       setForm({
         tripName: initialData.tripName || '',
         description: initialData.description || '',
+        country: initialData.country || '',
+        city: initialData.city || '',
         startDate: initialData.startDate || '',
         endDate: initialData.endDate || '',
         coverPhotoUrl: initialData.coverPhotoUrl || '',
@@ -94,6 +98,40 @@ export default function TripForm({ initialData, onSubmit, isLoading, submitLabel
         {errors.tripName && (
           <p className="text-xs text-red-500 mt-1">{errors.tripName}</p>
         )}
+      </div>
+
+      {/* Destination (Country & City) */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label className="block text-sm font-medium text-neutral-700 mb-1.5">
+            Country
+          </label>
+          <div className="relative">
+            <Globe className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
+            <input
+              name="country"
+              value={form.country}
+              onChange={handleChange}
+              placeholder="e.g. India"
+              className={inputClass('country')}
+            />
+          </div>
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-neutral-700 mb-1.5">
+            City
+          </label>
+          <div className="relative">
+            <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
+            <input
+              name="city"
+              value={form.city}
+              onChange={handleChange}
+              placeholder="e.g. Agra"
+              className={inputClass('city')}
+            />
+          </div>
+        </div>
       </div>
 
       {/* Description */}

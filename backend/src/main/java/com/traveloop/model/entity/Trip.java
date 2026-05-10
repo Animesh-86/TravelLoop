@@ -40,6 +40,12 @@ public class Trip {
     @Column(name = "end_date", nullable = false)
     private LocalDate endDate;
 
+    @Column(length = 100)
+    private String country;
+
+    @Column(length = 100)
+    private String city;
+
     @Column(name = "cover_photo_url", length = 500)
     private String coverPhotoUrl;
 

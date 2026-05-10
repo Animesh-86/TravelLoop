@@ -56,12 +56,12 @@ export function formatDateFull(dateStr) {
  * @param {number|string} amount
  * @returns {string} "$1,234.00"
  */
-export function formatCurrency(amount) {
+export function formatCurrency(amount, currencyCode = 'USD') {
   const num = parseFloat(amount);
-  if (isNaN(num)) return '$0';
-  return new Intl.NumberFormat('en-US', {
+  if (isNaN(num)) return currencyCode === 'INR' ? '₹0' : '$0';
+  return new Intl.NumberFormat(currencyCode === 'INR' ? 'en-IN' : 'en-US', {
     style: 'currency',
-    currency: 'USD',
+    currency: currencyCode,
     minimumFractionDigits: 0,
     maximumFractionDigits: 0,
   }).format(num);
@@ -89,4 +89,20 @@ export function daysBetween(startDate, endDate) {
 export function truncate(text, maxLen = 100) {
   if (!text || text.length <= maxLen) return text || '';
   return text.slice(0, maxLen).trim() + '…';
+}
+
+/**
+ * Determine currency code based on trip data
+ * @param {Object} trip
+ * @returns {string} 'INR' or 'USD'
+ */
+export function getTripCurrency(trip) {
+  if (!trip) return 'USD';
+  if (trip.country && trip.country.toLowerCase() === 'india') return 'INR';
+  
+  const name = (trip.tripName || '').toLowerCase();
+  const desc = (trip.description || '').toLowerCase();
+  if (name.includes('india') || name.includes('goa') || desc.includes('india')) return 'INR';
+  if (trip.stops?.some(s => s.city?.country?.toLowerCase() === 'india')) return 'INR';
+  return 'USD';
 }

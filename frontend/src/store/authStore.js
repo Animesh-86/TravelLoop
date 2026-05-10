@@ -32,6 +32,11 @@ const useAuthStore = create(
               email: response.email,
               fullName: response.fullName,
               role: response.role,
+              phoneNumber: response.phoneNumber,
+              city: response.city,
+              country: response.country,
+              profilePhotoUrl: response.profilePhotoUrl,
+              createdAt: response.createdAt,
             },
             accessToken: response.accessToken,
             refreshToken: response.refreshToken,
@@ -63,6 +68,11 @@ const useAuthStore = create(
               email: response.email,
               fullName: response.fullName,
               role: response.role,
+              phoneNumber: response.phoneNumber,
+              city: response.city,
+              country: response.country,
+              profilePhotoUrl: response.profilePhotoUrl,
+              createdAt: response.createdAt,
             },
             accessToken: response.accessToken,
             refreshToken: response.refreshToken,
@@ -76,6 +86,41 @@ const useAuthStore = create(
             error.response?.data?.message ||
             error.response?.data?.error ||
             'Registration failed. Please try again.';
+          set({ isLoading: false, error: message });
+          throw error;
+        }
+      },
+      
+      /**
+       * Login with Google
+       */
+      googleLogin: async (idToken) => {
+        set({ isLoading: true, error: null });
+        try {
+          const response = await authService.googleLogin(idToken);
+          set({
+            user: {
+              userId: response.userId,
+              email: response.email,
+              fullName: response.fullName,
+              role: response.role,
+              phoneNumber: response.phoneNumber,
+              city: response.city,
+              country: response.country,
+              profilePhotoUrl: response.profilePhotoUrl,
+              createdAt: response.createdAt,
+            },
+            accessToken: response.accessToken,
+            refreshToken: response.refreshToken,
+            isAuthenticated: true,
+            isLoading: false,
+            error: null,
+          });
+          return response;
+        } catch (error) {
+          const message =
+            error.response?.data?.message ||
+            'Google login failed.';
           set({ isLoading: false, error: message });
           throw error;
         }

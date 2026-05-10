@@ -14,6 +14,11 @@ public class AuthResponse {
     private UUID userId;
     private String email;
     private String fullName;
+    private String phoneNumber;
+    private String city;
+    private String country;
+    private String profilePhotoUrl;
+    private java.time.LocalDateTime createdAt;
     private String role;
     private String accessToken;
     private String refreshToken;

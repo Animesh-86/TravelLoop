@@ -50,7 +50,7 @@ spring:
   # ── Spring AI — Gemini via OpenAI-compatible endpoint ──
   ai:
     openai:
-      api-key: ${GEMINI_API_KEY:your-gemini-api-key}
+      api-key: ${GEMINI_API_KEY:AIzaSyBijdj5aWLqdgYtSxIS_xMDqa5yMCFvy-4}
       base-url: https://generativelanguage.googleapis.com/v1beta/openai/
       chat:
         options:
@@ -59,10 +59,12 @@ spring:
 
 # ── JWT ──
 app:
+  google:
+    client-id: ${GOOGLE_CLIENT_ID:339374223627-lptj3pivl7ql3saliv7prlr8n67ce9g7.apps.googleusercontent.com}
   jwt:
-    secret: ${JWT_SECRET:a4f8071e45d1bc08f1c30b2e65e847f0d2735a1ec6429b0e54db2c17a9f8e3b1}
-    access-token-expiration-ms: 900000        # 15 minutes
-    refresh-token-expiration-ms: 604800000    # 7 days
+    secret: ${JWT_SECRET:404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970}
+    access-token-expiration-ms: 3600000 # 1 hour
+    refresh-token-expiration-ms: 604800000 # 7 days
 
   # ── CORS ──
   cors:

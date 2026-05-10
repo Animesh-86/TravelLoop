@@ -28,6 +28,9 @@ public class TripRequest {
     @NotNull(message = "End date is required")
     private LocalDate endDate;
 
+    private String country;
+    private String city;
+
     private String coverPhotoUrl;
     private Boolean isPublic;
     private BigDecimal totalBudget;

@@ -1,7 +1,8 @@
 version: '3.8'
 
 services:
-  postgres:
+  # ── Database ──
+  db:
     image: postgres:16-alpine
     container_name: traveloop-db
     environment:
@@ -17,6 +18,45 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+    networks:
+      - traveloop-network
+
+  # ── Backend ──
+  backend:
+    build: ./backend
+    container_name: traveloop-backend
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/traveloop
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+      JWT_SECRET: ${JWT_SECRET:-404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-339374223627-lptj3pivl7ql3saliv7prlr8n67ce9g7.apps.googleusercontent.com}
+      SPRING_AI_GEMINI_API_KEY: ${GEMINI_API_KEY}
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - traveloop-network
+
+  # ── Frontend ──
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        VITE_GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-339374223627-lptj3pivl7ql3saliv7prlr8n67ce9g7.apps.googleusercontent.com}
+    container_name: traveloop-frontend
+    ports:
+      - "5173:80"
+    depends_on:
+      - backend
+    networks:
+      - traveloop-network
+
+networks:
+  traveloop-network:
+    driver: bridge
 
 volumes:
   postgres_data:

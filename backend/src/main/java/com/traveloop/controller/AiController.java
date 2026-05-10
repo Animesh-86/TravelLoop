@@ -27,6 +27,7 @@ import java.util.UUID;
 public class AiController {
 
     private final SmartPlannerService smartPlannerService;
+    private final com.traveloop.service.interfaces.ReceiptScannerService receiptScannerService;
     private final UserRepository userRepository;
 
     /* ──────────────────────────────────────────────────
@@ -83,6 +84,50 @@ public class AiController {
         ItinerarySuggestion suggestion = smartPlannerService
                 .regenerateItinerary(tripId, userId, refinementPrompt);
         return ResponseEntity.ok(suggestion);
+    }
+
+    /* ──────────────────────────────────────────────────
+     *  POST /api/ai/receipt
+     *  Scan receipt image and return JSON
+     * ────────────────────────────────────────────────── */
+    @PostMapping(value = "/receipt", consumes = "multipart/form-data")
+    @Operation(summary = "Scan a receipt using Gemini Vision",
+               description = "Upload a receipt image to extract items, prices, tax, and total.")
+    public ResponseEntity<Map<String, Object>> scanReceipt(
+            @RequestParam("file") org.springframework.web.multipart.MultipartFile file) {
+        
+        Map<String, Object> result = receiptScannerService.scanReceipt(file);
+        return ResponseEntity.ok(result);
+    }
+
+    /* ──────────────────────────────────────────────────
+     *  POST /api/ai/trips/{tripId}/chat
+     *  Chat with TravelLoop Genie
+     * ────────────────────────────────────────────────── */
+    @PostMapping("/trips/{tripId}/chat")
+    @Operation(summary = "Chat with TravelLoop Genie (Trip Context)",
+               description = "Ask questions or get advice about a specific trip.")
+    public ResponseEntity<Map<String, String>> chatWithGenie(
+            @PathVariable UUID tripId,
+            @RequestBody Map<String, String> body,
+            Authentication authentication) {
+        
+        UUID userId = extractUserId(authentication);
+        String message = body.get("message");
+        
+        String response = smartPlannerService.chatWithGenie(tripId, userId, message);
+        return ResponseEntity.ok(Map.of("response", response));
+    }
+
+    @PostMapping("/chat")
+    @Operation(summary = "General chat with TravelLoop Genie",
+               description = "Ask general questions about the platform or travel tips.")
+    public ResponseEntity<Map<String, String>> generalChat(
+            @RequestBody Map<String, String> body) {
+        
+        String message = body.get("message");
+        String response = smartPlannerService.generalChat(message);
+        return ResponseEntity.ok(Map.of("response", response));
     }
 
     /* ─── Helper ─── */

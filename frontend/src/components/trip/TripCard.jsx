@@ -5,7 +5,7 @@
 import { useNavigate } from 'react-router-dom';
 import { MapPin, Calendar, Users, DollarSign, Trash2 } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { formatDate, formatCurrency } from '../../utils/formatters';
+import { formatDate, formatCurrency, getTripCurrency } from '../../utils/formatters';
 
 const STATUS_STYLES = {
   upcoming: 'bg-blue-100 text-blue-700',
@@ -93,7 +93,7 @@ export default function TripCard({ trip, onDelete, showActions = true }) {
           {trip.totalBudget > 0 && (
             <span className="flex items-center gap-1">
               <DollarSign className="w-3.5 h-3.5" />
-              {formatCurrency(trip.totalBudget)}
+              {formatCurrency(trip.totalBudget, getTripCurrency(trip))}
             </span>
           )}
 

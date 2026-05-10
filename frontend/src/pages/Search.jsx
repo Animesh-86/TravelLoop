@@ -4,6 +4,7 @@
    ──────────────────────────────────────────── */
 
 import { useState, useEffect, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Search as SearchIcon, MapPin, Star, DollarSign,
@@ -12,10 +13,12 @@ import {
 import { useSearchCities, usePopularCities, useCountries } from '../hooks/useCities';
 import useTripStore from '../store/tripStore';
 import { CardSkeleton } from '../components/ui/LoadingSkeleton';
+import DestinationGuide from '../components/itinerary/DestinationGuide';
 
 const COST_LABELS = ['', 'Budget', 'Affordable', 'Moderate', 'Premium', 'Luxury'];
 
 export default function SearchPage() {
+  const navigate = useNavigate();
   const {
     searchQuery, setSearchQuery,
     selectedCountry, setSelectedCountry,
@@ -26,6 +29,7 @@ export default function SearchPage() {
 
   const [debouncedQuery, setDebouncedQuery] = useState(searchQuery);
   const [showFilters, setShowFilters] = useState(false);
+  const [selectedCity, setSelectedCity] = useState(null);
 
   // Debounce search
   useEffect(() => {
@@ -241,6 +245,7 @@ export default function SearchPage() {
               {filteredCities.map((city, i) => (
                 <motion.div
                   key={city.cityId}
+                  onClick={() => setSelectedCity(city)}
                   layout
                   initial={{ opacity: 0, scale: 0.95 }}
                   animate={{ opacity: 1, scale: 1 }}
@@ -248,7 +253,7 @@ export default function SearchPage() {
                   transition={{ delay: i * 0.03 }}
                   whileHover={{ y: -4 }}
                   className="group rounded-2xl bg-white/80 backdrop-blur-sm border border-neutral-200/50
-                             shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden"
+                             shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden cursor-pointer"
                 >
                   {/* Image */}
                   <div className="relative h-36 overflow-hidden">
@@ -318,6 +323,74 @@ export default function SearchPage() {
           </div>
         )}
       </div>
+
+      {/* ── City Detail Modal ── */}
+      <AnimatePresence>
+        {selectedCity && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setSelectedCity(null)}
+              className="absolute inset-0 bg-neutral-900/40 backdrop-blur-sm"
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="relative w-full max-w-3xl max-h-[90vh] bg-neutral-50 rounded-3xl shadow-2xl overflow-hidden flex flex-col"
+            >
+              {/* Header Image */}
+              <div className="relative h-48 sm:h-64 flex-shrink-0">
+                {selectedCity.imageUrl ? (
+                  <img src={selectedCity.imageUrl} alt={selectedCity.cityName} className="w-full h-full object-cover" />
+                ) : (
+                  <div className="w-full h-full bg-gradient-to-br from-primary/80 to-secondary/80 flex items-center justify-center">
+                    <MapPin className="w-12 h-12 text-white/40" />
+                  </div>
+                )}
+                <button
+                  onClick={() => setSelectedCity(null)}
+                  className="absolute top-4 right-4 p-2 bg-black/20 hover:bg-black/40 backdrop-blur-md rounded-full text-white transition-colors"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+                <div className="absolute bottom-0 inset-x-0 p-6 bg-gradient-to-t from-black/80 to-transparent">
+                  <h2 className="font-display font-bold text-3xl text-white">{selectedCity.cityName}</h2>
+                  <p className="text-white/80 flex items-center gap-1.5 mt-1">
+                    <MapPin className="w-4 h-4" /> {selectedCity.country}
+                  </p>
+                </div>
+              </div>
+
+              {/* Scrollable Content */}
+              <div className="flex-1 overflow-y-auto p-6 space-y-6">
+                
+                {/* Action Bar */}
+                <div className="flex gap-4">
+                  <button
+                    onClick={() => navigate('/create-trip', { state: { city: selectedCity.cityName, country: selectedCity.country } })}
+                    className="flex-1 bg-primary text-white py-3 px-6 rounded-xl font-semibold shadow-lg shadow-primary/25 hover:bg-primary-dark transition-colors flex items-center justify-center gap-2"
+                  >
+                    <MapPin className="w-5 h-5" />
+                    Plan a trip to {selectedCity.cityName}
+                  </button>
+                </div>
+
+                {selectedCity.description && (
+                  <p className="text-neutral-600 leading-relaxed">
+                    {selectedCity.description}
+                  </p>
+                )}
+                
+                {/* Embedded Destination Guide */}
+                <DestinationGuide cityName={selectedCity.cityName} />
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

@@ -47,6 +47,17 @@ const authService = {
     const response = await api.get('/auth/me');
     return response.data;
   },
+
+  /**
+   * Login with Google ID Token
+   * POST /auth/google-login
+   * @param {string} idToken
+   * @returns {Promise<AuthResponse>}
+   */
+  googleLogin: async (idToken) => {
+    const response = await api.post('/auth/google-login', { idToken });
+    return response.data;
+  },
 };
 
 export default authService;

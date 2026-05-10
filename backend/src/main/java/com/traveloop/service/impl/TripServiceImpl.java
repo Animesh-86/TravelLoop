@@ -59,6 +59,8 @@ public class TripServiceImpl implements TripService {
                 .description(request.getDescription())
                 .startDate(request.getStartDate())
                 .endDate(request.getEndDate())
+                .country(request.getCountry())
+                .city(request.getCity())
                 .coverPhotoUrl(request.getCoverPhotoUrl())
                 .isPublic(request.getIsPublic() != null ? request.getIsPublic() : false)
                 .totalBudget(request.getTotalBudget())

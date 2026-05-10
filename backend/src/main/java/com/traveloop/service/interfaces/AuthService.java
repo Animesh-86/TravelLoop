@@ -15,5 +15,7 @@ public interface AuthService {
 
     AuthResponse refreshToken(String refreshToken);
 
+    AuthResponse googleLogin(String idToken);
+
     UserResponse getCurrentUser(UUID userId);
 }

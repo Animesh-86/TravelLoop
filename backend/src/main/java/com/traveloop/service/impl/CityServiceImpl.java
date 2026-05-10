@@ -20,10 +20,12 @@ public class CityServiceImpl implements CityService {
 
     private final CityRepository cityRepository;
     private final ModelMapper modelMapper;
+    private final com.traveloop.service.interfaces.DynamicDestinationService dynamicDestinationService;
 
-    public CityServiceImpl(CityRepository cityRepository, ModelMapper modelMapper) {
+    public CityServiceImpl(CityRepository cityRepository, ModelMapper modelMapper, com.traveloop.service.interfaces.DynamicDestinationService dynamicDestinationService) {
         this.cityRepository = cityRepository;
         this.modelMapper = modelMapper;
+        this.dynamicDestinationService = dynamicDestinationService;
     }
 
     @Override
@@ -42,7 +44,14 @@ public class CityServiceImpl implements CityService {
 
     @Override
     public List<CityResponse> searchCities(String query) {
-        return cityRepository.searchByNameOrCountry(query).stream()
+        List<City> cities = cityRepository.searchByNameOrCountry(query);
+        if (cities.isEmpty() && query != null && query.length() > 2) {
+            City dynamicCity = dynamicDestinationService.discoverCity(query);
+            if (dynamicCity != null) {
+                cities.add(dynamicCity);
+            }
+        }
+        return cities.stream()
                 .map(this::toResponse).collect(Collectors.toList());
     }
 

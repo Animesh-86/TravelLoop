@@ -3,7 +3,7 @@
    Categories, checkboxes, progress bar
    ──────────────────────────────────────────── */
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeft, Package, Plus, Trash2, ChevronDown, ChevronUp, Check } from 'lucide-react';
@@ -22,13 +22,21 @@ export default function PackingChecklist() {
   const navigate = useNavigate();
   const { data: trip } = useTrip(tripId);
 
-  const [categories, setCategories] = useState(() =>
-    DEFAULT_CATEGORIES.map((cat) => ({
+  const storageKey = tripId ? `travelloop-packing-${tripId}` : 'travelloop-packing-global';
+
+  const [categories, setCategories] = useState(() => {
+    const saved = localStorage.getItem(storageKey);
+    if (saved) return JSON.parse(saved);
+    return DEFAULT_CATEGORIES.map((cat) => ({
       ...cat,
       expanded: true,
       items: cat.items.map((name) => ({ name, packed: false })),
-    }))
-  );
+    }));
+  });
+
+  useEffect(() => {
+    localStorage.setItem(storageKey, JSON.stringify(categories));
+  }, [categories, storageKey]);
   const [newItem, setNewItem] = useState('');
   const [newCat, setNewCat] = useState('');
 

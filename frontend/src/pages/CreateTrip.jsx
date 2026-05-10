@@ -3,7 +3,7 @@
    Name, dates, place, description
    ──────────────────────────────────────────── */
 
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { ArrowLeft, MapPin } from 'lucide-react';
 import TripForm from '../components/trip/TripForm';
@@ -11,7 +11,18 @@ import { useCreateTrip } from '../hooks/useTrips';
 
 export default function CreateTrip() {
   const navigate = useNavigate();
+  const location = useLocation();
   const createTrip = useCreateTrip();
+
+  // If navigating from DestinationGuide, we might have city and country
+  const prefilledCity = location.state?.city || '';
+  const prefilledCountry = location.state?.country || '';
+
+  const initialData = {
+    tripName: prefilledCity ? `Trip to ${prefilledCity}` : '',
+    city: prefilledCity,
+    country: prefilledCountry,
+  };
 
   const handleSubmit = (data) => {
     createTrip.mutate(data, {
@@ -63,6 +74,7 @@ export default function CreateTrip() {
                      border border-neutral-200/50 shadow-sm"
         >
           <TripForm
+            initialData={initialData}
             onSubmit={handleSubmit}
             isLoading={createTrip.isPending}
             submitLabel="Create Trip"

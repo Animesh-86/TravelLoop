@@ -21,11 +21,12 @@ import {
 } from 'lucide-react';
 import useAuthStore from '../store/authStore';
 import { validators, validateForm } from '../utils/validators';
+import { GoogleLogin } from '@react-oauth/google';
 
 export default function Login() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { login, isLoading, error, clearError, isAuthenticated } = useAuthStore();
+  const { login, googleLogin, isLoading, error, clearError, isAuthenticated } = useAuthStore();
 
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [fieldErrors, setFieldErrors] = useState({});
@@ -174,6 +175,9 @@ export default function Login() {
           </div>
 
           <div className="mb-8">
+            <Link to="/" className="inline-flex items-center gap-2 text-primary text-sm font-bold mb-6 hover:gap-3 transition-all">
+                <ArrowRight className="w-4 h-4 rotate-180" /> Back to Home
+            </Link>
             <h1 className="font-display text-2xl font-bold text-neutral-dark mb-2">
               Welcome back
             </h1>
@@ -308,6 +312,30 @@ export default function Login() {
               )}
             </motion.button>
           </form>
+
+          <div className="relative my-8">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-neutral-200"></div>
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-neutral-50 px-2 text-neutral-400">Or continue with</span>
+            </div>
+          </div>
+
+          <div className="flex justify-center">
+            <GoogleLogin
+              onSuccess={(credentialResponse) => {
+                googleLogin(credentialResponse.credential);
+              }}
+              onError={() => {
+                console.log('Login Failed');
+              }}
+              useOneTap
+              theme="outline"
+              shape="pill"
+              width="384px"
+            />
+          </div>
 
           {/* ── Register Link ── */}
           <p className="text-center text-sm text-neutral-400 mt-8">

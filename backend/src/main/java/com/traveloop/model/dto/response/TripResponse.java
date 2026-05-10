@@ -20,6 +20,8 @@ public class TripResponse {
     private String description;
     private LocalDate startDate;
     private LocalDate endDate;
+    private String country;
+    private String city;
     private String coverPhotoUrl;
     private String status;
     private Boolean isPublic;

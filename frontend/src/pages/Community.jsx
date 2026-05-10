@@ -9,6 +9,7 @@ import { Globe, Search, Users, TrendingUp } from 'lucide-react';
 import { usePublicTrips } from '../hooks/useTrips';
 import TripCard from '../components/trip/TripCard';
 import { CardSkeleton } from '../components/ui/LoadingSkeleton';
+import CommunityChat from '../components/social/CommunityChat';
 
 export default function Community() {
   const { data: trips, isLoading } = usePublicTrips();
@@ -103,6 +104,8 @@ export default function Community() {
           </div>
         )}
       </div>
+
+      <CommunityChat />
     </div>
   );
 }
